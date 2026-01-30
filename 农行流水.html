@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>中国农业银行</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "微软雅黑", sans-serif;}
+        body {background: #f5f7fa; color: #333; font-size: 14px;}
+        .page {display: none;}
+        .page.active {display: block;}
+        .title-bar {background: #fff; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e5e5; position: sticky; top:0; z-index:99;}
+        .title-bar .back {font-size: 17px; color: #1687FF; cursor: pointer;}
+        .title-bar .title {font-size: 18px; font-weight: 500;}
+        .title-bar .more {font-size: 17px; color: #666; cursor: pointer;}
+        .footer-nav {background: #fff; display: flex; justify-content: space-around; padding: 6px 0 8px; border-top: 1px solid #e5e5e5; position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;}
+        .nav-item {text-align: center; color: #666; font-size: 11px; cursor: pointer;}
+        .nav-item.active {color: #1687FF;}
+        .nav-item i {font-size: 22px; margin-bottom: 4px; display: block;}
+        .container {padding: 10px 0 60px; background: #f5f7fa;}
+        .card {background: #fff; margin: 0 15px 10px; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
+        .btn {padding: 8px 15px; border-radius: 4px; border: none; font-size: 14px; cursor: pointer;}
+        .btn.blue {background: #1687FF; color: #fff;}
+        .btn.gray {background: #f5f5f5; color: #666;}
+
+        /* 首页完全贴合官方 */
+        .home-header {background: linear-gradient(180deg, #4BAFFF 0%, #1687FF 100%); padding: 15px 15px 12px; color: #fff;}
+        .home-search {display: flex; align-items: center; background: #fff; border-radius: 20px; padding: 8px 15px; margin-bottom: 10px;}
+        .home-search i {font-size: 15px; color: #999; margin-right: 8px;}
+        .home-search input {background: transparent; border: none; outline: none; color: #333; flex: 1; font-size: 14px;}
+        .home-search input::placeholder {color: #999;}
+        .home-banner-text {font-size: 12px; line-height: 1.4; color: #fff;}
+        .home-banner-text span {color: #FFEB3B; font-weight: 500;}
+        
+        /* 快捷功能原生布局 */
+        .quick-func {background: #fff; margin: 0 15px 10px; border-radius: 6px; padding: 12px 0;}
+        .quick-row {display: flex; justify-content: space-around;}
+        .quick-item {text-align: center; width: 25%;}
+        .quick-item .icon {width: 48px; height: 48px; border-radius: 8px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff;}
+        .icon-account {background: #00C48C;}
+        .icon-transfer {background: #FF7D00;}
+        .icon-pay {background: #6366FB;}
+        .icon-scan {background: #00A862;}
+        .quick-item span {font-size: 12px; color: #333;}
+        .common-func {padding: 12px 15px;}
+        .func-grid {display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px 0; text-align: center;}
+        .func-item {display: flex; flex-direction: column; align-items: center;}
+        .func-item i {width: 32px; height: 32px; border-radius: 6px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #666; margin-bottom: 5px;}
+        .func-item span {font-size: 11px; color: #666;}
+        .news-bar {padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid #f5f5f5;}
+        .news-bar:last-child {border-bottom: none;}
+        .news-tag {background: #FFE57F; color: #FF9900; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 10px;}
+        .news-text {font-size: 13px; color: #333; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .news-more {font-size: 12px; color: #999;}
+        .ad-bar {padding: 12px; text-align: center; background: #E8F4FF;}
+        .ad-bar .ad-title {font-size: 15px; color: #1687FF; font-weight: 500;}
+        .ad-bar .ad-desc {font-size: 12px; color: #666; margin-top: 2px;}
+
+        /* 新增财富优选模块 */
+        .wealth-opt {padding: 15px;}
+        .wealth-opt .title-row {display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+        .wealth-opt .title {font-size: 16px; font-weight: 500;}
+        .wealth-opt .more {font-size: 13px; color: #1687FF;}
+        .wealth-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
+        .wealth-card {background: #fff; border-radius: 6px; padding: 12px; border: 1px solid #f5f5f5;}
+        .wealth-card.large {grid-column: span 1;}
+        .wealth-card .name {font-size: 14px; font-weight: 500; margin-bottom: 3px;}
+        .wealth-card .tag {display: inline-block; font-size: 11px; color: #FF7D00; background: #FFF5E6; padding: 1px 6px; border-radius: 3px; margin-left: 4px;}
+        .wealth-card .desc {font-size: 12px; color: #666; margin-bottom: 8px;}
+        .wealth-card .limit {font-size: 20px; font-weight: bold; color: #E63946; margin-bottom: 8px;}
+        .wealth-card .limit-desc {font-size: 12px; color: #666; margin-bottom: 10px;}
+        .wealth-card .btn {font-size: 13px; background: #FF7D00; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer;}
+        .wealth-card .link {font-size: 13px; color: #FF7D00; cursor: pointer;}
+        .market-info {display: flex; justify-content: space-between; padding: 8px 12px; background: #fff; border-radius: 6px; margin-top: 10px; border: 1px solid #f5f5f5;}
+        .market-item {text-align: center;}
+        .market-item .label {font-size: 12px; color: #666; margin-bottom: 2px;}
+        .market-item .value {font-size: 14px; font-weight: 500;}
+
+        /* 新增热门活动模块 */
+        .hot-activity {padding: 15px;}
+        .hot-activity .title-row {display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+        .hot-activity .title {font-size: 16px; font-weight: 500;}
+        .hot-activity .more {font-size: 13px; color: #1687FF;}
+        .activity-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
+        .activity-card {background: #fff; border-radius: 6px; padding: 12px; border: 1px solid #f5f5f5; overflow: hidden;}
+        .activity-card.large {grid-column: span 1;}
+        .activity-card .name {font-size: 14px; font-weight: 500; margin-bottom: 3px;}
+        .activity-card .desc {font-size: 12px; color: #666; margin-bottom: 8px;}
+        .activity-card .img-wrap {width: 100%; height: 80px; border-radius: 4px; overflow: hidden; margin-bottom: 8px;}
+        .activity-card .img-wrap img {width: 100%; height: 100%; object-fit: cover;}
+        .activity-card .link {font-size: 13px; color: #FF7D00; cursor: pointer;}
+
+        /* 新增网点服务模块 */
+        .branch-service {padding: 15px; border-bottom: 1px solid #f5f5f5;}
+        .branch-service .title-row {display: flex; justify-content: space-between; align-items: center;}
+        .branch-service .title {font-size: 16px; font-weight: 500;}
+        .branch-service .refresh {font-size: 13px; color: #00C48C;}
+        .branch-service .more {font-size: 13px; color: #1687FF;}
+
+        /* 我的账户页原生逻辑 */
+        .annual-banner {background: linear-gradient(180deg, #4BAFFF 0%, #1687FF 100%); padding: 12px 15px; color: #fff; text-align: center;}
+        .annual-banner .title {font-size: 16px; font-weight: 500; margin-bottom: 3px;}
+        .annual-banner .desc {font-size: 12px;}
+        .debit-card {padding: 15px;}
+        .card-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
+        .card-info {display: flex; align-items: center;}
+        .card-type {width: 36px; height: 36px; background: #FF4D4F; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; margin-right: 12px;}
+        .card-no {font-size: 16px; font-weight: 500; color: #333;}
+        .card-actions {display: flex; gap: 10px;}
+        .card-actions .opt {font-size: 12px; padding: 3px 8px; border-radius: 4px; cursor: pointer;}
+        .opt.view {color: #1687FF; background: rgba(22,135,255,0.1);}
+        .opt.alias {color: #666; background: #f5f5f5;}
+        .balance-wrap {margin-bottom: 15px;}
+        .balance-label {font-size: 14px; color: #999; margin-bottom: 5px;}
+        .balance-value {font-size: 26px; font-weight: bold; color: #333;}
+        .balance-detail {text-align: right; font-size: 12px; color: #1687FF; margin-top: 4px; cursor: pointer;}
+        .card-func {display: flex; border-top: 1px solid #f5f5f5;}
+        .card-func-item {flex: 1; padding: 12px 0; text-align: center; font-size: 14px; color: #333; cursor: pointer; border-right: 1px solid #f5f5f5;}
+        .card-func-item:last-child {border-right: none;}
+        .card-func-item.active {background: #FFF5E6; color: #FF7D00;}
+        .credit-card {padding: 15px; text-align: center; border-top: 1px solid #f5f5f5;}
+        .credit-title {font-size: 16px; font-weight: 500; margin-bottom: 4px;}
+        .credit-desc {font-size: 12px; color: #999; margin-bottom: 10px;}
+        .credit-apply {display: inline-block; padding: 8px 15px; background: #f5f5f5; border-radius: 4px; color: #333; font-size: 14px; cursor: pointer;}
+        .e-account {padding: 15px; text-align: center; border-top: 1px solid #f5f5f5;}
+        .e-account span {color: #FF9900; font-size: 14px; font-weight: 500;}
+
+        /* 明细页完全贴合银行默认（核心优化） */
+        .detail-module {padding: 15px;}
+        .module-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f5f5f5; padding-bottom: 8px;}
+        .module-title {font-size: 15px; color: #333; font-weight: 500;}
+        .module-more {font-size: 13px; color: #1687FF;}
+        .filter-bar {display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;}
+        .filter-bar select {padding: 6px 8px; border: 1px solid #e5e5e5; border-radius: 4px; font-size: 13px; background: #fff; color: #333;}
+        .history-tip {font-size: 12px; color: #FF7D00; padding: 8px 10px; margin-bottom: 10px; background: #FFF8E6; border-radius: 4px; border-left: 3px solid #FF7D00;}
+        .detail-list {width: 100%;}
+        .detail-item {padding: 12px 0; border-bottom: 1px solid #f5f5f5;}
+        .detail-item:last-child {border-bottom: none;}
+        .detail-top {display: flex; justify-content: space-between; align-items: center; cursor: pointer;}
+        .detail-left {flex: 1;}
+        .detail-date {font-size: 14px; font-weight: 500; margin-bottom: 3px;}
+        .detail-summary {font-size: 13px; color: #666;}
+        .detail-right {font-size: 14px; font-weight: 500;}
+        .detail-right.income {color: #E63946;}
+        .detail-right.expense {color: #00C48C;}
+        .detail-expand {padding: 10px 0 0; font-size: 12px; display: none;}
+        .detail-expand.show {display: block;}
+        .expand-row {display: flex; justify-content: space-between; padding: 2px 0;}
+        .expand-label {color: #999;}
+        .expand-value {color: #333; font-weight: 500;}
+
+        /* 我的页面原生样式 */
+        .my-top {background: linear-gradient(180deg, #4BAFFF 0%, #1687FF 100%); padding: 20px 15px 15px; color: #fff;}
+        .user-info-row {display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
+        .user-avatar-name {display: flex; align-items: center;}
+        .avatar {width: 50px; height: 50px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #1687FF; margin-right: 12px;}
+        .user-name {font-size: 17px; font-weight: 500;}
+        .user-tag {font-size: 12px; background: rgba(255,255,255,0.3); border-radius: 10px; padding: 1px 8px; margin-top: 4px; display: inline-block;}
+        .my-menu {display: flex; gap: 15px; font-size: 17px;}
+        .asset-card {background: #fff; padding: 15px; margin: 0 15px; border-radius: 6px; transform: translateY(-10px);}
+        .asset-title {font-size: 13px; color: #999; margin-bottom: 8px;}
+        .asset-balance {font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px;}
+        .asset-detail {display: flex; justify-content: space-between; font-size: 12px; color: #666;}
+        .my-func {background: #fff; margin: 5px 15px 10px; border-radius: 6px; padding: 10px 0;}
+        .my-func-row {display: flex; justify-content: space-around;}
+        .my-func-item {text-align: center; width: 25%;}
+        .my-func-item i {font-size: 18px; color: #666; margin-bottom: 5px;}
+        .my-func-item span {font-size: 11px; color: #666;}
+
+        /* 财富/生活/资讯/转账页原生适配 */
+        .wealth-banner {background: linear-gradient(135deg, #FF7D00, #FFB74D); padding: 12px 15px; color: #fff; text-align: center; border-radius: 6px 6px 0 0;}
+        .wealth-banner .title {font-size: 16px; font-weight: 500; margin-bottom: 3px;}
+        .wealth-banner .desc {font-size: 12px; opacity: 0.9;}
+        .wealth-func {display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; padding: 12px 0; border-bottom: 1px solid #f5f5f5;}
+        .wealth-func:last-child {border-bottom: none;}
+        .wealth-item {padding: 8px 0;}
+        .wealth-item i {font-size: 20px; color: #1687FF; margin-bottom: 5px;}
+        .wealth-item span {font-size: 12px; color: #333;}
+        .finance-recommend {padding: 15px;}
+        .finance-title {font-size: 15px; font-weight: 500; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .finance-title .more {font-size: 12px; color: #1687FF;}
+        .finance-card {border: 1px solid #f5f5f5; border-radius: 4px; padding: 10px; margin-bottom: 10px;}
+        .finance-card:last-child {margin-bottom: 0;}
+        .finance-name {font-size: 14px; font-weight: 500; margin-bottom: 5px;}
+        .finance-rate {color: #FF4D4F; font-size: 16px; font-weight: bold;}
+        .finance-rate span {font-size: 12px; color: #999; font-weight: normal;}
+        .life-header {background: #1687FF; padding: 12px 15px; color: #fff; border-radius: 6px 6px 0 0;}
+        .life-header .title {font-size: 18px; font-weight: 500; margin-bottom: 3px;}
+        .life-header .desc {font-size: 12px; opacity: 0.9;}
+        .life-func {display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 0; padding: 12px 15px; text-align: center; border-bottom: 1px solid #f5f5f5;}
+        .life-item {display: flex; flex-direction: column; align-items: center;}
+        .life-item i {width: 40px; height: 40px; border-radius: 8px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #666; margin-bottom: 6px;}
+        .life-item span {font-size: 11px; color: #666;}
+        .life-discount {padding: 15px;}
+        .discount-title {font-size: 15px; font-weight: 500; margin-bottom: 10px;}
+        .discount-item {border-radius: 4px; background: #FFF8E6; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .discount-item:last-child {margin-bottom: 0;}
+        .discount-text {font-size: 13px; color: #FF7D00;}
+        .discount-go {font-size: 12px; color: #FF7D00;}
+        .info-wrap {padding: 15px;}
+        .info-title {font-size: 16px; font-weight: 500; margin-bottom: 10px;}
+        .info-list {margin-bottom: 15px;}
+        .info-list:last-child {margin-bottom: 0;}
+        .info-item {font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 8px;}
+        .transfer-wrap {padding: 15px;}
+        .transfer-item {margin-bottom: 15px;}
+        .transfer-item label {font-size: 13px; color: #333; margin-bottom: 5px; display: block;}
+        .transfer-item input {width: 100%; padding: 10px; border: 1px solid #e5e5e5; border-radius: 4px; font-size: 14px; outline: none;}
+        .transfer-item input:focus {border-color: #1687FF;}
+    </style>
+</head>
+<body>
+    <div class="page active" id="homePage">
+        <div class="home-header">
+            <div class="home-search">
+                <i>🔍</i>
+                <input type="text" placeholder="存金通">
+            </div>
+            <div class="home-banner-text">"农情颐养宝"法巴农银理财 <span>首只按月分红型产品臻选上线</span></div>
+        </div>
+        <div class="container">
+            <div class="quick-func">
+                <div class="quick-row">
+                    <div class="quick-item" onclick="switchPage('accountPage')">
+                        <div class="icon icon-account">👤</div>
+                        <span>我的账户</span>
+                    </div>
+                    <div class="quick-item" onclick="switchPage('transferPage')">
+                        <div class="icon icon-transfer">💸</div>
+                        <span>转账</span>
+                    </div>
+                    <div class="quick-item">
+                        <div class="icon icon-pay">📊</div>
+                        <span>收支</span>
+                    </div>
+                    <div class="quick-item">
+                        <div class="icon icon-scan">📷</div>
+                        <span>扫一扫</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card common-func">
+                <div class="func-grid">
+                    <div class="func-item"><i>💳</i><span>信用卡</span></div>
+                    <div class="func-item"><i>🏠</i><span>养老社区</span></div>
+                    <div class="func-item"><i>💰</i><span>存款</span></div>
+                    <div class="func-item"><i>📈</i><span>理财</span></div>
+                    <div class="func-item"><i>💡</i><span>贷款</span></div>
+                    <div class="func-item"><i>💧</i><span>缴费</span></div>
+                    <div class="func-item"><i>🎁</i><span>活动</span></div>
+                    <div class="func-item"><i>🥰</i><span>小豆</span></div>
+                    <div class="func-item"><i>🏙️</i><span>城市</span></div>
+                    <div class="func-item"><i>⋮</i><span>全部</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="news-bar">
+                    <div class="news-tag">待办</div>
+                    <div class="news-text">快来试试智能提醒吧，帮你管好账户收支</div>
+                    <div class="news-more">>></div>
+                </div>
+                <div class="news-bar">
+                    <div class="news-tag">焦点</div>
+                    <div class="news-text">中国商火年度会议亮目标；多只美股科技股财报本周密集发布</div>
+                    <div class="news-more">>></div>
+                </div>
+            </div>
+            <div class="card ad-bar">
+                <div class="ad-title">逛九州享好礼</div>
+                <div class="ad-desc">惊喜盲盒等你抽</div>
+            </div>
+
+            <!-- 新增：财富优选模块 -->
+            <div class="card wealth-opt">
+                <div class="title-row">
+                    <div class="title">财富优选</div>
+                    <div class="more" onclick="switchPage('wealthPage')">></div>
+                </div>
+                <div class="wealth-grid">
+                    <div class="wealth-card large">
+                        <div class="name">农行快e宝2号<span class="tag">基金</span></div>
+                        <div class="desc">最快实时到账</div>
+                        <div class="limit">20万元</div>
+                        <div class="limit-desc">每日最高累计快赎额度</div>
+                        <button class="btn" onclick="switchPage('wealthPage')">查看详情</button>
+                    </div>
+                    <div class="wealth-card">
+                        <div class="name">银利多<span class="tag">存款</span></div>
+                        <div class="desc">起存金额低、存期选择多</div>
+                        <div class="link" onclick="switchPage('wealthPage')">去看看></div>
+                    </div>
+                    <div class="wealth-card">
+                        <div class="name">存金通<span class="tag">贵金属</span></div>
+                        <div class="desc">买黄金，到农行</div>
+                        <div class="link" onclick="switchPage('wealthPage')">去查看></div>
+                    </div>
+                </div>
+                <div class="market-info">
+                    <div class="market-item">
+                        <div class="label">美元(USD)</div>
+                        <div class="value">696.37</div>
+                    </div>
+                    <div class="market-item">
+                        <div class="label">黄金(AU)</div>
+                        <div class="value">1233.68</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新增：热门活动模块 -->
+            <div class="card hot-activity">
+                <div class="title-row">
+                    <div class="title">热门活动</div>
+                    <div class="more" onclick="switchPage('lifePage')">></div>
+                </div>
+                <div class="activity-grid">
+                    <div class="activity-card large">
+                        <div class="name">以旧换新</div>
+                        <div class="desc">换新有优惠</div>
+                        <div class="img-wrap">
+                            <img src="https://picsum.photos/seed/appliance/300/200" alt="以旧换新">
+                        </div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="name">超多品牌优惠券</div>
+                        <div class="desc">折扣低至5.5折</div>
+                        <div class="link" onclick="switchPage('lifePage')">去查看></div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="name">信用卡优惠专区</div>
+                        <div class="desc">查看优惠合集</div>
+                        <div class="link" onclick="switchPage('lifePage')">去报名></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新增：网点服务模块 -->
+            <div class="card branch-service">
+                <div class="title-row">
+                    <div class="title">网点服务</div>
+                    <div class="refresh">🔄</div>
+                    <div class="more" onclick="switchPage('myPage')">></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item active" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="accountPage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('homePage')">←</div>
+            <div class="title">我的账户</div>
+            <div class="more">⋮</div>
+        </div>
+        <div class="container">
+            <div class="card annual-banner">
+                <div class="title">2025掌银年度账单</div>
+                <div class="desc">您的年度账单待开启 >></div>
+            </div>
+            <div class="card">
+                <div class="debit-card">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <div class="card-type">I类</div>
+                            <div class="card-no">6228 **** 8077</div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="opt view">查看/分享</div>
+                            <div class="opt alias">设置别名</div>
+                        </div>
+                    </div>
+                    <div class="balance-wrap">
+                        <div class="balance-label">人民币可用余额</div>
+                        <div class="balance-value">¥ 0.00</div>
+                    </div>
+                    <div class="balance-detail">详情 ></div>
+                    <div class="card-func">
+                        <div class="card-func-item" onclick="switchPage('detailPage')">查询明细</div>
+                        <div class="card-func-item" onclick="switchPage('transferPage')">我要转账</div>
+                        <div class="card-func-item active">活钱理财</div>
+                    </div>
+                </div>
+                <div class="credit-card">
+                    <div class="credit-title">一键办卡</div>
+                    <div class="credit-desc">积分、权益、活动、优惠享不停</div>
+                    <div class="credit-apply">立即申请信用卡</div>
+                </div>
+                <div class="e-account">
+                    <span>➕ 开通电子账户（享更多理财权益）</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="detailPage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('accountPage')">←</div>
+            <div class="title">银行卡交易明细</div>
+            <div class="more">筛选</div>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="detail-module">
+                    <div class="module-header">
+                        <div class="module-title">6228 **** 8077 交易明细</div>
+                        <div class="module-more">更多筛选</div>
+                    </div>
+                    <div class="filter-bar">
+                        <select id="yearFilter" onchange="filterDetail()">
+                            <option value="all">全部年份</option>
+                            <option value="2025">2025年</option>
+                            <option value="2026">2026年</option>
+                        </select>
+                        <select id="monthFilter" onchange="filterDetail()">
+                            <option value="all">全部月份</option>
+                            <option value="01">1月</option><option value="02">2月</option><option value="03">3月</option>
+                            <option value="04">4月</option><option value="05">5月</option><option value="06">6月</option>
+                            <option value="07">7月</option><option value="08">8月</option><option value="09">9月</option>
+                            <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                        </select>
+                    </div>
+                    <div class="history-tip">温馨提示：2025年以前的交易明细，请通过电脑端个人网上银行查询</div>
+                    <div class="detail-list" id="detailList"></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="myPage">
+        <div class="my-top">
+            <div class="user-info-row">
+                <div class="user-avatar-name">
+                    <div class="avatar">👨</div>
+                    <div>
+                        <div class="user-name">王官通</div>
+                        <div class="user-tag">一星客户</div>
+                    </div>
+                </div>
+                <div class="my-menu">
+                    <i>⚙️</i>
+                    <i>🔔</i>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="asset-card">
+                <div class="asset-title">我的总资产（元）</div>
+                <div class="asset-balance">¥ 0.00</div>
+                <div class="asset-detail">
+                    <span>昨日收益 0.00</span>
+                    <span>持有理财 0.00</span>
+                </div>
+            </div>
+            <div class="my-func">
+                <div class="my-func-row">
+                    <div class="my-func-item"><i>📝</i><span>我的订单</span></div>
+                    <div class="my-func-item"><i>🎫</i><span>我的权益</span></div>
+                    <div class="my-func-item"><i>📍</i><span>网点服务</span></div>
+                    <div class="my-func-item"><i>❓</i><span>客服中心</span></div>
+                </div>
+            </div>
+            <div class="card common-func">
+                <div class="func-grid">
+                    <div class="func-item"><i>🔐</i><span>安全中心</span></div>
+                    <div class="func-item"><i>📱</i><span>设备管理</span></div>
+                    <div class="func-item"><i>💬</i><span>消息中心</span></div>
+                    <div class="func-item"><i>⚙️</i><span>设置</span></div>
+                    <div class="func-item"><i>📜</i><span>我的合同</span></div>
+                    <div class="func-item"><i>🏦</i><span>网点预约</span></div>
+                    <div class="func-item"><i>📞</i><span>电话银行</span></div>
+                    <div class="func-item"><i>⋮</i><span>更多服务</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item active" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="wealthPage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('homePage')">←</div>
+            <div class="title">财富</div>
+            <div class="more">⋮</div>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="wealth-banner">
+                    <div class="title">财富管理 智享未来</div>
+                    <div class="desc">专业理财服务，助力资产稳健增值</div>
+                </div>
+                <div class="wealth-func">
+                    <div class="wealth-item"><i>💰</i><span>存款</span></div>
+                    <div class="wealth-item"><i>📈</i><span>理财</span></div>
+                    <div class="wealth-item"><i>🪙</i><span>基金</span></div>
+                </div>
+                <div class="wealth-func">
+                    <div class="wealth-item"><i>💎</i><span>贵金属</span></div>
+                    <div class="wealth-item"><i>💡</i><span>贷款</span></div>
+                    <div class="wealth-item"><i>📊</i><span>资产全景</span></div>
+                </div>
+                <div class="finance-recommend">
+                    <div class="finance-title">热门理财推荐 <span class="more">更多>></span></div>
+                    <div class="finance-card">
+                        <div class="finance-name">农银时时付货币A</div>
+                        <div class="finance-rate">2.35% <span>七日年化</span></div>
+                        <div style="font-size:12px; color:#999; margin-top:3px;">1元起购 | 随时赎回 | 零手续费</div>
+                    </div>
+                    <div class="finance-card">
+                        <div class="finance-name">农银稳利固收30天</div>
+                        <div class="finance-rate">3.12% <span>预期年化收益</span></div>
+                        <div style="font-size:12px; color:#999; margin-top:3px;">1000元起购 | 持有30天 | 稳健型</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item active" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="lifePage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('homePage')">←</div>
+            <div class="title">生活服务</div>
+            <div class="more">⋮</div>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="life-header">
+                    <div class="title">品质生活 一站尽享</div>
+                    <div class="desc">缴费、充值、优惠、出行全覆盖</div>
+                </div>
+                <div class="life-func">
+                    <div class="life-item"><i>💧</i><span>水电缴费</span></div>
+                    <div class="life-item"><i>📱</i><span>手机充值</span></div>
+                    <div class="life-item"><i>⛽</i><span>加油优惠</span></div>
+                    <div class="life-item"><i>🚄</i><span>火车票</span></div>
+                </div>
+                <div class="life-func">
+                    <div class="life-item"><i>🎬</i><span>电影票</span></div>
+                    <div class="life-item"><i>🍱</i><span>外卖美食</span></div>
+                    <div class="life-item"><i>🚗</i><span>车主服务</span></div>
+                    <div class="life-item"><i>⋮</i><span>更多服务</span></div>
+                </div>
+                <div class="life-discount">
+                    <div class="discount-title">热门优惠</div>
+                    <div class="discount-item">
+                        <div class="discount-text">手机充值立减5元（满50可用）</div>
+                        <div class="discount-go">立即参与>></div>
+                    </div>
+                    <div class="discount-item">
+                        <div class="discount-text">加油满200立减15元（每周五）</div>
+                        <div class="discount-go">立即参与>></div>
+                    </div>
+                    <div class="discount-item">
+                        <div class="discount-text">电影票低至9.9元（特惠场次）</div>
+                        <div class="discount-go">立即参与>></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item active" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="infoPage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('homePage')">←</div>
+            <div class="title">农银资讯</div>
+            <div class="more">订阅</div>
+        </div>
+        <div class="container">
+            <div class="card info-wrap">
+                <div class="info-title">银行动态</div>
+                <div class="info-list">
+                    <div class="info-item">• 农行推出个人养老金专属理财，享税收优惠+额外收益</div>
+                    <div class="info-item">• 掌银转账0手续费，跨行跨省实时到账，高效便捷</div>
+                    <div class="info-item">• 新版掌银正式上线，新增财富全景视图，管理更省心</div>
+                </div>
+            </div>
+            <div class="card info-wrap">
+                <div class="info-title">理财知识</div>
+                <div class="info-list">
+                    <div class="info-item">• 稳健理财怎么选？固收类理财产品入门指南</div>
+                    <div class="info-item">• 个人养老金账户开通全流程，附权益解读</div>
+                    <div class="info-item">• 防范电信网络诈骗，守住自己的钱袋子</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item active" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <div class="page" id="transferPage">
+        <div class="title-bar">
+            <div class="back" onclick="switchPage('homePage')">←</div>
+            <div class="title">转账汇款</div>
+            <div class="more">转账记录</div>
+        </div>
+        <div class="container">
+            <div class="card transfer-wrap">
+                <div class="transfer-item">
+                    <label>收款方账户</label>
+                    <input type="text" placeholder="请输入收款方银行卡号">
+                </div>
+                <div class="transfer-item">
+                    <label>收款方姓名</label>
+                    <input type="text" placeholder="请输入收款方真实姓名">
+                </div>
+                <div class="transfer-item">
+                    <label>转账金额（元）</label>
+                    <input type="number" placeholder="请输入转账金额">
+                </div>
+                <button class="btn blue" style="width:100%;">下一步</button>
+            </div>
+        </div>
+        <div class="footer-nav">
+            <div class="nav-item" onclick="switchPage('homePage')"><i>🏠</i><span>首页</span></div>
+            <div class="nav-item" onclick="switchPage('wealthPage')"><i>💰</i><span>财富</span></div>
+            <div class="nav-item" onclick="switchPage('lifePage')"><i>🛍️</i><span>生活</span></div>
+            <div class="nav-item" onclick="switchPage('infoPage')"><i>📰</i><span>资讯</span></div>
+            <div class="nav-item" onclick="switchPage('myPage')"><i>👤</i><span>我的</span></div>
+        </div>
+    </div>
+
+    <script>
+        let detailData = [];
+        const salaryUnit = "大连中伦文德律师事务所";
+        const outTarget = "个人账户转账";
+        const transFlowPrefix = "25000010";
+        let flowNum = 1001;
+        const salaryList = [
+            {salary:3500, date:'2025-01-15', remark:'25/1'},
+            {salary:3500, date:'2025-02-15', remark:'25/2'},
+            {salary:3500, date:'2025-03-15', remark:'25/3'},
+            {salary:3500, date:'2025-04-15', remark:'25/4'},
+            {salary:4670, date:'2025-05-15', remark:'25/5'},
+            {salary:4600, date:'2025-06-15', remark:'25/6'},
+            {salary:5500, date:'2025-07-15', remark:'25/7'},
+            {salary:5500, date:'2025-08-15', remark:'25/8'},
+            {salary:6200, date:'2025-09-15', remark:'25/9'},
+            {salary:8100, date:'2025-10-15', remark:'25/10'},
+            {salary:6800, date:'2025-11-15', remark:'25/11'},
+            {salary:6350, date:'2025-12-15', remark:'25/12'},
+            {salary:7100, date:'2026-01-15', remark:'26/1'}
+        ];
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelector(`.nav-item[onclick="switchPage('${pageId}')"]`).classList.add('active');
+        }
+
+        function toggleDetail(el) {
+            const expand = el.nextElementSibling;
+            expand.classList.toggle('show');
+        }
+
+        function renderDetail(list = []) {
+            const detailList = document.getElementById('detailList');
+            detailList.innerHTML = '';
+            const renderData = list.length > 0 ? list : detailData;
+            
+            renderData.forEach((item, index) => {
+                const {date, summary, income, expense, balance, target, remark, flowNo} = item;
+                const amount = income > 0 ? `+${income}` : `- ${expense}`;
+                const amountClass = income > 0 ? 'income' : 'expense';
+                
+                const detailItem = document.createElement('div');
+                detailItem.className = 'detail-item';
+                const flowNoHtml = flowNo ? `<div class="expand-row"><div class="expand-label">转账流水号</div><div class="expand-value">${flowNo}</div></div>` : '';
+                detailItem.innerHTML = `
+                    <div class="detail-top" onclick="toggleDetail(this)">
+                        <div class="detail-left">
+                            <div class="detail-date">${date}</div>
+                            <div class="detail-summary">${summary}</div>
+                        </div>
+                        <div class="detail-right ${amountClass}">${amount}</div>
+                    </div>
+                    <div class="detail-expand">
+                        <div class="expand-row"><div class="expand-label">交易对象</div><div class="expand-value">${target}</div></div>
+                        <div class="expand-row"><div class="expand-label">收入金额</div><div class="expand-value">${income || 0} 元</div></div>
+                        <div class="expand-row"><div class="expand-label">支出金额</div><div class="expand-value">${expense || 0} 元</div></div>
+                        <div class="expand-row"><div class="expand-label">账户余额</div><div class="expand-value">${balance} 元</div></div>
+                        <div class="expand-row"><div class="expand-label">备注</div><div class="expand-value">${remark || '无'}</div></div>
+                        ${flowNoHtml}
+                    </div>
+                `;
+                detailList.appendChild(detailItem);
+            });
+        }
+
+        function filterDetail() {
+            const year = document.getElementById('yearFilter').value;
+            const month = document.getElementById('monthFilter').value;
+            let filtered = [...detailData];
+            
+            if(year!=='all') filtered = filtered.filter(item => item.date.split('-')[0] === year);
+            if(month!=='all') filtered = filtered.filter(item => item.date.split('-')[1] === month);
+            renderDetail(filtered);
+        }
+
+        function initDetailData() {
+            let currentBalance = 0;
+            flowNum = 1001;
+            let tempData = [];
+            salaryList.forEach(item => {
+                const {salary, date, remark} = item;
+                currentBalance += salary;
+                tempData.push({
+                    date, summary:'工资代发', income:salary, expense:0, balance:currentBalance,
+                    target:salaryUnit, remark, flowNo:''
+                });
+                currentBalance -= salary;
+                const flowNo = transFlowPrefix + flowNum++;
+                tempData.push({
+                    date, summary:'账户转账', income:0, expense:salary, balance:currentBalance,
+                    target:outTarget, remark:'', flowNo
+                });
+            });
+            detailData = tempData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        window.onload = () => {
+            initDetailData();
+            renderDetail();
+        };
+    </script>
+</body>
+</html>
